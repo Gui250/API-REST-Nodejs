@@ -1,6 +1,7 @@
 import express, { Request, Response } from "express";
 import productsRoutes from "./routes/products-routes";
 import AppError from "./utils/AppError";
+import { ZodError } from "zod";
 
 const PORT = 3000;
 
@@ -13,6 +14,12 @@ app.use("/products", productsRoutes);
 app.use((error: any, request: Request, response: Response, _: any) => {
   if (error instanceof AppError) {
     return response.status(error.statusCode).json({ message: error.message });
+  }
+
+  if (error instanceof ZodError) {
+    return response
+      .status(400)
+      .json({ message: "Validation Error", issues: error.format() });
   }
 
   return response.status(500).json({ message: "Requisição Invalida!" });
